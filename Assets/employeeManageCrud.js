@@ -18,7 +18,7 @@ connection.connect(err => {
 const userToDo = [{
     type: "list",
     message: "Hello and welcome to the Employee Manager app! What would you like to do?",
-    choices: ["View All Employees", "View All Employees By Department", "View All Roles", "Add Employee", "Add Role", "Update Employee Role", "Quit"],
+    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "Add Employee", "Add Role", "Update Employee Role", "Quit"],
     name: "userToDoRes"
 }];
 
@@ -26,21 +26,24 @@ const userToDo = [{
 // const userToDo = [{
 //     type: "list",
 //     message: "Hello and welcome to the Employee Manager app! What would you like to do?",
-//     choices: ["View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles", "Add Role", "Remove Role", "Remove Department"],
+//     choices: ["View All Employees", "View All Departments", "View All Employees By Department", "View All Employees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles", "Add Role", "Remove Role", "Remove Department"],
 //     name: "userToDoRes"
 // }];
 
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
+            case "View All Departments":
+                viewAllDep();
+                break;
+            case "View All Roles":
+                viewAllRoles();
+                break;
             case "View All Employees":
                 viewAllEmp();
                 break;
             case "View All Employees By Department":
                 viewAllEmpDep();
-                break;
-            case "View All Roles":
-                viewAllRoles();
                 break;
             case "Add Employee":
                 addEmp();
@@ -58,18 +61,35 @@ const init = () => {
     });
 }
 
-const viewAllEmp = () => {
-    console.log("test view all emp route");
-    init();
-};
-
-const viewAllEmpDep = () => {
-    console.log("test view all emp dep route");
-    init();
+const viewAllDep = () => {
+    console.log("test view all dep route");
+    connection.query("SELECT * FROM department", (err, res) => {
+        if (err) throw err;
+        console.log(res);
+        init();
+    });
 };
 
 const viewAllRoles = () => {
     console.log("test view all roles route");
+    connection.query("SELECT * FROM role", (err, res) => {
+        if (err) throw err;
+        console.log(res);
+        init();
+    });
+};
+
+const viewAllEmp = () => {
+    console.log("test view all emp route");
+    connection.query("SELECT * FROM employee", (err, res) => {
+        if (err) throw err;
+        console.log(res);
+        init();
+    });
+};
+
+const viewAllEmpDep = () => {
+    console.log("test view all emp dep route");
     init();
 };
 
