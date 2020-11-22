@@ -33,7 +33,7 @@ const numberValidate = async input => {
 // mvp
 const userToDo = [{
     type: "list",
-    message: "Hello and welcome to the Employee Manager app! What would you like to do?",
+    message: "What would you like to do?",
     choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "Add Employee", "Add Role", "Update Employee Role", "Quit"],
     name: "userToDoRes"
 }];
@@ -45,6 +45,11 @@ const userToDo = [{
 //     choices: ["View All Employees", "View All Departments", "View All Employees By Department", "View All Employees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles", "Add Role", "Remove Role", "Remove Department"],
 //     name: "userToDoRes"
 // }];
+const roleChoices = ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"];
+
+const managerChoices = ["Johnny Bravo", "Homer Simpson", "Ned Flanders", "Stewie Griffin", "Jisoo Kim", "Jennie Kim", "Roseanne Park", "Lalisa Manoban"];
+
+const deptChoices = [];
 
 const addEmpQuestions = [{
         type: "input",
@@ -61,13 +66,13 @@ const addEmpQuestions = [{
     {
         type: "list",
         message: "What is the employee's role?",
-        choices: ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"],
+        choices: roleChoices,
         name: "empRole"
     },
     {
         type: "list",
         message: "Who is the employee's manager?",
-        choices: ["Johnny Bravo", "Homer Simpson", "Ned Flanders", "Stewie Griffin", "Jisoo Kim", "Jennie Kim", "Roseanne Park", "Lalisa Manoban"],
+        choices: managerChoices,
         name: "empManager"
     },
 ];
@@ -135,25 +140,44 @@ const viewAllEmpDep = () => {
     init();
 };
 
+const deptLength = () => {
+    connection.query("SELECT 1 FROM department",
+        (err, res) => {
+            if (res.length === 0) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+}
+
 const addEmp = () => {
     console.log("test add emp route");
-    inquirer.prompt(addEmpQuestions).then(res => {
-        connection.query(
-            "INSERT INTO employee SET ?", {
-                first_name: res.firstName,
-                last_name: res.lastName,
-                role_id: // make a new function that returns value depending on employee role
-                    23,
-                manager_id: 33 // make a new function that returns value depending on employee manager
-            }, (err, res) => {
-                if (err) throw err;
-                console.log(res);
-                init();
-            }
-        );
-    });
-    // init();
+    if (deptLength) {
+        console.log("Please add a department before adding any employees!\r\n")
+        init();
+    } else {
+        inquirer.prompt(addEmpQuestions).then(res => {
+            connection.query(
+                "INSERT INTO employee SET ?", {
+                    first_name: res.firstName,
+                    last_name: res.lastName,
+                    role_id: // make a new function that returns value depending on employee role
+                        23,
+                    manager_id: 33 // make a new function that returns value depending on employee manager
+                }, (err, res) => {
+                    if (err) throw err;
+                    console.log(res);
+                    init();
+                }
+            );
+        });
+    }
 };
+
+const managerId = person => {
+
+}
 
 const addRole = () => {
     console.log("test add role route");
