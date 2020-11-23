@@ -12,6 +12,9 @@ const connection = mysql.createConnection({
 connection.connect(err => {
     if (err) throw err;
     console.log("Connection successful!");
+    checkLength("department");
+    checkLength("role");
+    init();
 });
 // validate function for string responses
 const stringValidate = async input => {
@@ -45,7 +48,8 @@ const userToDo = [{
 //     choices: ["View All Employees", "View All Departments", "View All Employees By Department", "View All Employees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles", "Add Role", "Remove Role", "Remove Department"],
 //     name: "userToDoRes"
 // }];
-const roleChoices = ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"];
+// "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"
+const roleChoices = [];
 
 const managerChoices = ["Johnny Bravo", "Homer Simpson", "Ned Flanders", "Stewie Griffin", "Jisoo Kim", "Jennie Kim", "Roseanne Park", "Lalisa Manoban"];
 
@@ -140,23 +144,51 @@ const viewAllEmpDep = () => {
     init();
 };
 
-const deptLength = () => {
-    connection.query("SELECT 1 FROM department",
+const checkLength = async table => {
+    connection.query(`SELECT * FROM ${table}`,
         (err, res) => {
+            if (err) throw err;
             if (res.length === 0) {
-                return true;
+                console.log("\r\ntest true checkLength " + table);
+                return;
             } else {
-                return false;
+                console.log("\r\ntest false checkLength " + table);
+                if (table === "department") {
+                    for (let i = 0; i < res.length; i++) {
+                        deptChoices.push(res[i].name)
+                    }
+                } else if (table === "role") {
+                    for (let i = 0; i < res.length; i++) {
+                        roleChoices.push(res[i].name)
+                    }
+                }
             }
         });
 }
 
-const addEmp = () => {
-    console.log("test add emp route");
-    if (deptLength) {
-        console.log("Please add a department before adding any employees!\r\n")
+const addEmp = async () => {
+    let checkDept;
+    let checkRole;
+    if (deptChoices.length === 0) {
+        checkDept = true;
+    } else {
+        checkDept = false;
+    }
+    if (roleChoices.length === 0) {
+        checkRole = true;
+    } else {
+        checkRole = false;
+    }
+    console.log(checkDept + " test checkDept");
+    console.log(checkDept + " test checkRole");
+    if (checkDept) {
+        console.log("Please add a department before adding any employees!\r\n");
+        init();
+    } else if (checkRole) {
+        console.log("Please add a role before adding any employees!\r\n");
         init();
     } else {
+        console.log("test add emp route");
         inquirer.prompt(addEmpQuestions).then(res => {
             connection.query(
                 "INSERT INTO employee SET ?", {
@@ -188,6 +220,3 @@ const updateEmpRole = () => {
     console.log("test update emp role route");
     init();
 };
-
-// initialize app
-init();
