@@ -111,6 +111,20 @@ const addEmpQuestions = [{
     },
 ];
 
+const updateRoleQuestions = [{
+        type: "list",
+        message: "Who is the employee that you want to update the role for?",
+        choices: managerChoices,
+        name: "empChoiceRole"
+    },
+    {
+        type: "list",
+        message: "What is the employee's new role?",
+        choices: roleChoices,
+        name: "empNewRole"
+    }
+];
+
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
@@ -296,6 +310,32 @@ const addRole = () => {
     }
 };
 
+
+const updateEmpRole = () => {
+    console.log("test update emp role route");
+    inquirer.prompt(updateRoleQuestions).then(res => {
+        let firstName = res.empChoiceRole.split(" ")[0];
+        let lastName = res.empChoiceRole.split(" ")[1];
+        console.log(firstName + " " + lastName + " test first name last name");
+        connection.query(
+            "UPDATE employee SET ? WHERE ? AND ?", [{
+                role_id: getRoleId(res.empNewRole)
+            }, {
+                first_name: firstName
+            }, {
+                last_name: lastName
+            }], (err, res) => {
+                if (err) throw err;
+            }
+        );
+    }).then(() => {
+        checkLength("employee");
+        init()
+    }).catch((e) => {
+        console.log(e)
+    });
+}
+
 const addEmp = () => {
     let checkDept;
     let checkRole;
@@ -375,8 +415,3 @@ const getManagerId = manager => {
         return returnThisId;
     }
 }
-
-const updateEmpRole = () => {
-    console.log("test update emp role route");
-    init();
-};
