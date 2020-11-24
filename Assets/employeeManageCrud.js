@@ -205,6 +205,8 @@ const checkLength = async table => {
                 console.log("\r\ntest false checkLength " + table);
                 switch (table) {
                     case "department":
+                        deptChoices.length = 0;
+                        deptIds.length = 0;
                         for (let i = 0; i < res.length; i++) {
                             let departmentName = res[i].name;
                             let departmentId = res[i].id;
@@ -216,6 +218,8 @@ const checkLength = async table => {
                         };
                         break;
                     case "role":
+                        roleChoices.length = 0;
+                        roleIds.length = 0;
                         for (let i = 0; i < res.length; i++) {
                             let roleName = res[i].title;
                             let roleId = res[i].id;
@@ -227,6 +231,8 @@ const checkLength = async table => {
                         };
                         break;
                     case "employee":
+                        managerChoices.length = 0;
+                        managerIds.length = 0;
                         for (let i = 0; i < res.length; i++) {
                             let managerName = res[i].first_name + " " + res[i].last_name;
                             let managerId = res[i].id;
@@ -278,26 +284,17 @@ const addRole = () => {
                     department_id: getDeptId(res.roleDept)
                 }, (err, res) => {
                     if (err) throw err;
-                    init();
+
                 }
             );
+        }).then(() => {
+            checkLength("role");
+            init()
         }).catch((e) => {
             console.log(e)
         });
     }
 };
-
-const getDeptId = (department) => {
-    let returnThisId;
-    deptIds.forEach((value, index) => {
-        for (let key in value) {
-            if (department === key) {
-                returnThisId = value[key];
-            }
-        }
-    });
-    return returnThisId;
-}
 
 const addEmp = () => {
     let checkDept;
@@ -328,34 +325,30 @@ const addEmp = () => {
                     manager_id: getManagerId(res.empManager)
                 }, (err, res) => {
                     if (err) throw err;
-                    init();
                 }
             );
+        }).then(() => {
+            checkLength("employee");
+            init()
         }).catch((e) => {
             console.log(e)
         });
     }
 };
 
-const getManagerId = manager => {
-    if (manager === "None") {
-        return null;
-    } else {
-        let returnThisId;
-        console.log(manager + " test manager param");
-        console.log(managerIds);
-        managerIds.forEach((value, index) => {
-            for (let key in value) {
-                if (manager === key) {
-                    returnThisId = value[key];
-                }
+const getDeptId = department => {
+    let returnThisId;
+    deptIds.forEach((value, index) => {
+        for (let key in value) {
+            if (department === key) {
+                returnThisId = value[key];
             }
-        });
-        return returnThisId;
-    }
+        }
+    });
+    return returnThisId;
 }
 
-const getRoleId = (role) => {
+const getRoleId = role => {
     let returnThisId;
     roleIds.forEach((value, index) => {
         for (let key in value) {
@@ -365,6 +358,22 @@ const getRoleId = (role) => {
         }
     });
     return returnThisId;
+}
+
+const getManagerId = manager => {
+    if (manager === "None") {
+        return null;
+    } else {
+        let returnThisId;
+        managerIds.forEach((value, index) => {
+            for (let key in value) {
+                if (manager === key) {
+                    returnThisId = value[key];
+                }
+            }
+        });
+        return returnThisId;
+    }
 }
 
 const updateEmpRole = () => {
