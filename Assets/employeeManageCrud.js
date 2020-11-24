@@ -228,7 +228,13 @@ const checkLength = async table => {
                         break;
                     case "employee":
                         for (let i = 0; i < res.length; i++) {
-                            managerChoices.push(res[i].first_name + " " + res[i].last_name)
+                            let managerName = res[i].first_name + " " + res[i].last_name;
+                            let managerId = res[i].id;
+                            let newObj = {
+                                [managerName]: managerId
+                            }
+                            managerChoices.push(managerName);
+                            managerIds.push(newObj);
                         };
                         managerChoices.push("None");
                         break;
@@ -319,7 +325,7 @@ const addEmp = () => {
                     first_name: res.firstName,
                     last_name: res.lastName,
                     role_id: getRoleId(res.empRole),
-                    manager_id: 33 // make a new function that returns value depending on employee manager
+                    manager_id: getManagerId(res.empManager)
                 }, (err, res) => {
                     if (err) throw err;
                     init();
@@ -331,8 +337,22 @@ const addEmp = () => {
     }
 };
 
-const managerId = manager => {
-
+const getManagerId = manager => {
+    if (manager === "None") {
+        return null;
+    } else {
+        let returnThisId;
+        console.log(manager + " test manager param");
+        console.log(managerIds);
+        managerIds.forEach((value, index) => {
+            for (let key in value) {
+                if (manager === key) {
+                    returnThisId = value[key];
+                }
+            }
+        });
+        return returnThisId;
+    }
 }
 
 const getRoleId = (role) => {
