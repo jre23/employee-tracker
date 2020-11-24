@@ -9,6 +9,10 @@ const connection = mysql.createConnection({
     database: "employee_managementDB"
 });
 
+const roleChoices = [];
+const managerChoices = [];
+const deptChoices = [];
+
 connection.connect(err => {
     if (err) throw err;
     console.log("Connection successful!");
@@ -50,11 +54,6 @@ const userToDo = [{
 //     name: "userToDoRes"
 // }];
 // "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"
-const roleChoices = [];
-
-const managerChoices = [];
-
-const deptChoices = [];
 
 const addDeptQuestions = [{
     type: "input",
@@ -209,6 +208,7 @@ const checkLength = async table => {
                         for (let i = 0; i < res.length; i++) {
                             managerChoices.push(res[i].first_name + " " + res[i].last_name)
                         };
+                        managerChoices.push("None");
                         break;
                 }
             }
@@ -295,7 +295,11 @@ const addEmp = () => {
     }
 };
 
-const managerId = person => {
+const managerId = manager => {
+
+}
+
+const roleId = role => {
 
 }
 
