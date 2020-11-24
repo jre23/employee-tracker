@@ -73,7 +73,13 @@ const addRoleQuestions = [{
         message: "What is the salary for this role?",
         name: "roleSalary",
         validate: numberValidate
-    }
+    },
+    {
+        type: "list",
+        message: "What department does this role belong to?",
+        choices: deptChoices,
+        name: "roleDept"
+    },
 ];
 
 const addEmpQuestions = [{
@@ -195,9 +201,15 @@ const checkLength = async table => {
                 switch (table) {
                     case "department":
                         for (let i = 0; i < res.length; i++) {
-                            deptChoices.push(res[i].name)
+                            let departmentName = res[i].name;
+                            let departmentId = res[i].id;
+                            deptChoices.push(departmentName);
+                            deptIds.push({
+                                departmentName: departmentId
+                            });
                         };
                         break;
+
                     case "role":
 
                         for (let i = 0; i < res.length; i++) {
@@ -224,12 +236,19 @@ const addDept = () => {
             }, (err, res) => {
                 if (err) throw err;
                 console.log(res);
-                init();
-            }
-        );
+            });
+    }).then(() => {
+        checkLength("department");
+        init()
     }).catch((e) => {
         console.log(e)
     });
+}
+
+const deptIds = [];
+
+const getDeptId = (department) => {
+    return deptIds.department;
 }
 
 const addRole = () => {
@@ -239,7 +258,7 @@ const addRole = () => {
             "INSERT INTO role SET ?", {
                 title: res.roleName,
                 salary: res.roleSalary,
-                department_id: 0
+                department_id: getDeptId(res.roleDept)
             }, (err, res) => {
                 if (err) throw err;
                 console.log(res);
