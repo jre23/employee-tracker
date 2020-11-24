@@ -203,15 +203,15 @@ const checkLength = async table => {
                         for (let i = 0; i < res.length; i++) {
                             let departmentName = res[i].name;
                             let departmentId = res[i].id;
+                            let newObj = {
+                                [departmentName]: departmentId
+                            }
+                            console.log(departmentName + " deptName test");
                             deptChoices.push(departmentName);
-                            deptIds.push({
-                                departmentName: departmentId
-                            });
+                            deptIds.push(newObj);
                         };
                         break;
-
                     case "role":
-
                         for (let i = 0; i < res.length; i++) {
                             roleChoices.push(res[i].title)
                         };
@@ -239,6 +239,7 @@ const addDept = () => {
             });
     }).then(() => {
         checkLength("department");
+        console.log(deptIds);
         init()
     }).catch((e) => {
         console.log(e)
@@ -248,28 +249,45 @@ const addDept = () => {
 const deptIds = [];
 
 const getDeptId = (department) => {
-    return deptIds.department;
+    let returnThisId;
+    deptIds.forEach((value, index) => {
+        for (let key in value) {
+            if (department === key) {
+                returnThisId = value[key];
+            }
+        }
+    });
+    return returnThisId;
 }
 
 const addRole = () => {
     console.log("test add role route");
-    inquirer.prompt(addRoleQuestions).then(res => {
-        connection.query(
-            "INSERT INTO role SET ?", {
-                title: res.roleName,
-                salary: res.roleSalary,
-                department_id: getDeptId(res.roleDept)
-            }, (err, res) => {
-                if (err) throw err;
-                console.log(res);
-                init();
-            }
-        );
-    }).catch((e) => {
-        console.log(e)
-    });
+    if (deptChoices.length === 0) {
+        checkDept = true;
+    } else {
+        checkDept = false;
+    }
+    if (checkDept) {
+        console.log("Please add a department before adding any roles!\r\n");
+        init();
+    } else {
+        inquirer.prompt(addRoleQuestions).then(res => {
+            connection.query(
+                "INSERT INTO role SET ?", {
+                    title: res.roleName,
+                    salary: res.roleSalary,
+                    department_id: getDeptId(res.roleDept)
+                }, (err, res) => {
+                    if (err) throw err;
+                    console.log(res);
+                    init();
+                }
+            );
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
-
 
 const addEmp = () => {
     let checkDept;
