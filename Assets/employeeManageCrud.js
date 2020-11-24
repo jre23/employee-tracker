@@ -12,6 +12,9 @@ const connection = mysql.createConnection({
 const roleChoices = [];
 const managerChoices = [];
 const deptChoices = [];
+const deptIds = [];
+const roleIds = [];
+const managerIds = [];
 
 connection.connect(err => {
     if (err) throw err;
@@ -194,7 +197,9 @@ const checkLength = async table => {
         (err, res) => {
             if (err) throw err;
             if (res.length === 0) {
-                console.log("\r\ntest true checkLength " + table);
+                if (table === "employee") {
+                    managerChoices.push("None");
+                }
                 return;
             } else {
                 console.log("\r\ntest false checkLength " + table);
@@ -206,14 +211,19 @@ const checkLength = async table => {
                             let newObj = {
                                 [departmentName]: departmentId
                             }
-                            console.log(departmentName + " deptName test");
                             deptChoices.push(departmentName);
                             deptIds.push(newObj);
                         };
                         break;
                     case "role":
                         for (let i = 0; i < res.length; i++) {
-                            roleChoices.push(res[i].title)
+                            let roleName = res[i].title;
+                            let roleId = res[i].id;
+                            let newObj = {
+                                [roleName]: roleId
+                            }
+                            roleChoices.push(roleName);
+                            roleIds.push(newObj);
                         };
                         break;
                     case "employee":
@@ -228,36 +238,19 @@ const checkLength = async table => {
 }
 
 const addDept = () => {
-    console.log("test add dept route");
     inquirer.prompt(addDeptQuestions).then(res => {
         connection.query(
             "INSERT INTO department SET ?", {
                 name: res.deptName,
             }, (err, res) => {
                 if (err) throw err;
-                console.log(res);
             });
     }).then(() => {
         checkLength("department");
-        console.log(deptIds);
         init()
     }).catch((e) => {
         console.log(e)
     });
-}
-
-const deptIds = [];
-
-const getDeptId = (department) => {
-    let returnThisId;
-    deptIds.forEach((value, index) => {
-        for (let key in value) {
-            if (department === key) {
-                returnThisId = value[key];
-            }
-        }
-    });
-    return returnThisId;
 }
 
 const addRole = () => {
@@ -279,7 +272,6 @@ const addRole = () => {
                     department_id: getDeptId(res.roleDept)
                 }, (err, res) => {
                     if (err) throw err;
-                    console.log(res);
                     init();
                 }
             );
@@ -288,6 +280,18 @@ const addRole = () => {
         });
     }
 };
+
+const getDeptId = (department) => {
+    let returnThisId;
+    deptIds.forEach((value, index) => {
+        for (let key in value) {
+            if (department === key) {
+                returnThisId = value[key];
+            }
+        }
+    });
+    return returnThisId;
+}
 
 const addEmp = () => {
     let checkDept;
@@ -302,8 +306,6 @@ const addEmp = () => {
     } else {
         checkRole = false;
     }
-    console.log(checkDept + " test checkDept");
-    console.log(checkDept + " test checkRole");
     if (checkDept) {
         console.log("Please add a department before adding any employees!\r\n");
         init();
@@ -311,18 +313,15 @@ const addEmp = () => {
         console.log("Please add a role before adding any employees!\r\n");
         init();
     } else {
-        console.log("test add emp route");
         inquirer.prompt(addEmpQuestions).then(res => {
             connection.query(
                 "INSERT INTO employee SET ?", {
                     first_name: res.firstName,
                     last_name: res.lastName,
-                    role_id: // make a new function that returns value depending on employee role
-                        23,
+                    role_id: getRoleId(res.empRole),
                     manager_id: 33 // make a new function that returns value depending on employee manager
                 }, (err, res) => {
                     if (err) throw err;
-                    console.log(res);
                     init();
                 }
             );
@@ -336,8 +335,16 @@ const managerId = manager => {
 
 }
 
-const roleId = role => {
-
+const getRoleId = (role) => {
+    let returnThisId;
+    roleIds.forEach((value, index) => {
+        for (let key in value) {
+            if (role === key) {
+                returnThisId = value[key];
+            }
+        }
+    });
+    return returnThisId;
 }
 
 const updateEmpRole = () => {
