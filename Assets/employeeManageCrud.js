@@ -193,19 +193,23 @@ const checkLength = async table => {
                 return;
             } else {
                 console.log("\r\ntest false checkLength " + table);
-                if (table === "department") {
-                    for (let i = 0; i < res.length; i++) {
-                        deptChoices.push(res[i].name)
-                    }
-                } else if (table === "role") {
-                    for (let i = 0; i < res.length; i++) {
-                        roleChoices.push(res[i].title)
-                    }
-                } else if (table === "employee") {
-                    for (let i = 0; i < res.length; i++) {
-                        managerChoices.push(res[i].first_name + " " + res[i].last_name)
-                    }
-                    console.log(managerChoices);
+                switch (table) {
+                    case "department":
+                        for (let i = 0; i < res.length; i++) {
+                            deptChoices.push(res[i].name)
+                        };
+                        break;
+                    case "role":
+
+                        for (let i = 0; i < res.length; i++) {
+                            roleChoices.push(res[i].title)
+                        };
+                        break;
+                    case "employee":
+                        for (let i = 0; i < res.length; i++) {
+                            managerChoices.push(res[i].first_name + " " + res[i].last_name)
+                        };
+                        break;
                 }
             }
         });
