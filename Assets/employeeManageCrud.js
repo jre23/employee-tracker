@@ -14,6 +14,7 @@ connection.connect(err => {
     console.log("Connection successful!");
     checkLength("department");
     checkLength("role");
+    checkLength("employee");
     init();
 });
 // validate function for string responses
@@ -37,7 +38,7 @@ const numberValidate = async input => {
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
-    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "Add Employee", "Add Role", "Update Employee Role", "Quit"],
+    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Quit"],
     name: "userToDoRes"
 }];
 
@@ -51,9 +52,30 @@ const userToDo = [{
 // "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"
 const roleChoices = [];
 
-const managerChoices = ["Johnny Bravo", "Homer Simpson", "Ned Flanders", "Stewie Griffin", "Jisoo Kim", "Jennie Kim", "Roseanne Park", "Lalisa Manoban"];
+const managerChoices = [];
 
 const deptChoices = [];
+
+const addDeptQuestions = [{
+    type: "input",
+    message: "What is the department name?",
+    name: "deptName",
+    validate: stringValidate
+}]
+
+const addRoleQuestions = [{
+        type: "input",
+        message: "What is the name of the role?",
+        name: "roleName",
+        validate: stringValidate
+    },
+    {
+        type: "input",
+        message: "What is the salary for this role?",
+        name: "roleSalary",
+        validate: numberValidate
+    }
+];
 
 const addEmpQuestions = [{
         type: "input",
@@ -96,11 +118,14 @@ const init = () => {
             case "View All Employees By Department":
                 viewAllEmpDep();
                 break;
+            case "Add Role":
+                addRole();
+                break;
             case "Add Employee":
                 addEmp();
                 break;
-            case "Add Role":
-                addRole();
+            case "Add Department":
+                addDept();
                 break;
             case "Update Employee Role":
                 updateEmpRole();
@@ -116,8 +141,13 @@ const viewAllDep = () => {
     console.log("test view all dep route");
     connection.query("SELECT * FROM department", (err, res) => {
         if (err) throw err;
-        console.log(res);
-        init();
+        if (res.length === 0) {
+            console.log("There are no departments added yet!\r\n");
+            init();
+        } else {
+            console.log(res);
+            init();
+        }
     });
 };
 
@@ -125,8 +155,13 @@ const viewAllRoles = () => {
     console.log("test view all roles route");
     connection.query("SELECT * FROM role", (err, res) => {
         if (err) throw err;
-        console.log(res);
-        init();
+        if (res.length === 0) {
+            console.log("There are no roles added yet!\r\n");
+            init();
+        } else {
+            console.log(res);
+            init();
+        }
     });
 };
 
@@ -134,8 +169,13 @@ const viewAllEmp = () => {
     console.log("test view all emp route");
     connection.query("SELECT * FROM employee", (err, res) => {
         if (err) throw err;
-        console.log(res);
-        init();
+        if (res.length === 0) {
+            console.log("There are no employees added yet!\r\n");
+            init();
+        } else {
+            console.log(res);
+            init();
+        }
     });
 };
 
@@ -159,14 +199,56 @@ const checkLength = async table => {
                     }
                 } else if (table === "role") {
                     for (let i = 0; i < res.length; i++) {
-                        roleChoices.push(res[i].name)
+                        roleChoices.push(res[i].title)
                     }
+                } else if (table === "employee") {
+                    for (let i = 0; i < res.length; i++) {
+                        managerChoices.push(res[i].first_name + " " + res[i].last_name)
+                    }
+                    console.log(managerChoices);
                 }
             }
         });
 }
 
-const addEmp = async () => {
+const addDept = () => {
+    console.log("test add dept route");
+    inquirer.prompt(addDeptQuestions).then(res => {
+        connection.query(
+            "INSERT INTO department SET ?", {
+                name: res.deptName,
+            }, (err, res) => {
+                if (err) throw err;
+                console.log(res);
+                init();
+            }
+        );
+    }).catch((e) => {
+        console.log(e)
+    });
+}
+
+const addRole = () => {
+    console.log("test add role route");
+    inquirer.prompt(addRoleQuestions).then(res => {
+        connection.query(
+            "INSERT INTO role SET ?", {
+                title: res.roleName,
+                salary: res.roleSalary,
+                department_id: 0
+            }, (err, res) => {
+                if (err) throw err;
+                console.log(res);
+                init();
+            }
+        );
+    }).catch((e) => {
+        console.log(e)
+    });
+};
+
+
+const addEmp = () => {
     let checkDept;
     let checkRole;
     if (deptChoices.length === 0) {
@@ -203,6 +285,8 @@ const addEmp = async () => {
                     init();
                 }
             );
+        }).catch((e) => {
+            console.log(e)
         });
     }
 };
@@ -210,11 +294,6 @@ const addEmp = async () => {
 const managerId = person => {
 
 }
-
-const addRole = () => {
-    console.log("test add role route");
-    init();
-};
 
 const updateEmpRole = () => {
     console.log("test update emp role route");
