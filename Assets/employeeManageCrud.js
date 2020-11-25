@@ -125,6 +125,13 @@ const updateRoleQuestions = [{
     }
 ];
 
+const viewEmpDeptQuestions = [{
+    type: "list",
+    message: "What department do you want to see all of the employees in?",
+    choices: deptChoices,
+    name: "empDeptChoice"
+}, ]
+
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
@@ -202,8 +209,18 @@ const viewAllEmp = () => {
 };
 
 const viewAllEmpDep = () => {
-    console.log("test view all emp dep route");
-    init();
+    console.log("test view all emp dep route\r\n");
+    inquirer.prompt(viewEmpDeptQuestions).then(res => {
+        connection.query(
+            "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department on department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
+                if (err) throw err;
+                console.log(res);
+            });
+    }).then(() => {
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
 };
 
 const checkLength = async table => {
@@ -273,7 +290,7 @@ const addDept = () => {
             });
     }).then(() => {
         checkLength("department");
-        init()
+        init();
     }).catch((e) => {
         console.log(e)
     });
@@ -303,7 +320,7 @@ const addRole = () => {
             );
         }).then(() => {
             checkLength("role");
-            init()
+            init();
         }).catch((e) => {
             console.log(e)
         });
@@ -330,7 +347,7 @@ const updateEmpRole = () => {
         );
     }).then(() => {
         checkLength("employee");
-        init()
+        init();
     }).catch((e) => {
         console.log(e)
     });
@@ -369,7 +386,7 @@ const addEmp = () => {
             );
         }).then(() => {
             checkLength("employee");
-            init()
+            init();
         }).catch((e) => {
             console.log(e)
         });
