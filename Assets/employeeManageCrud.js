@@ -349,7 +349,7 @@ const addRole = () => {
                 "INSERT INTO role SET ?", {
                     title: res.roleName,
                     salary: res.roleSalary,
-                    department_id: getDeptId(res.roleDept)
+                    department_id: findId(deptIds, res.roleDept)
                 }, (err, res) => {
                     if (err) throw err;
 
@@ -421,8 +421,8 @@ const addEmp = () => {
                 "INSERT INTO employee SET ?", {
                     first_name: res.firstName,
                     last_name: res.lastName,
-                    role_id: getRoleId(res.empRole),
-                    manager_id: getManagerId(res.empManager)
+                    role_id: findId(roleIds, res.empRole),
+                    manager_id: findId(managerIds, res.empManager)
                 }, (err, res) => {
                     if (err) throw err;
                 }
@@ -436,30 +436,18 @@ const addEmp = () => {
     }
 };
 
-const getDeptId = department => {
-    return findId(deptIds, department);
-}
-
-const getRoleId = role => {
-    return findId(roleIds, role);
-}
-
-const getManagerId = manager => {
-    if (manager === "None") {
+const findId = (arrayName, arrayParam) => {
+    if (arrayParam === "None") {
         return null;
     } else {
-        return findId(managerIds, manager);
-    }
-}
-
-const findId = (arrayName, arrayParam) => {
-    let returnThisId;
-    arrayName.forEach((value, index) => {
-        for (let key in value) {
-            if (arrayParam === key) {
-                returnThisId = value[key];
+        let returnThisId;
+        arrayName.forEach((value, index) => {
+            for (let key in value) {
+                if (arrayParam === key) {
+                    returnThisId = value[key];
+                }
             }
-        }
-    });
-    return returnThisId;
+        });
+        return returnThisId;
+    }
 }
