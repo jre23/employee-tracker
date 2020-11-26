@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const consoleTable = require("console.table");
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -201,7 +202,7 @@ const viewAllDep = () => {
             console.log("There are no departments added yet!\r\n");
             init();
         } else {
-            console.log(res);
+            console.table(res);
             init();
         }
     });
@@ -215,7 +216,7 @@ const viewAllRoles = () => {
             console.log("There are no roles added yet!\r\n");
             init();
         } else {
-            console.log(res);
+            console.table(res);
             init();
         }
     });
@@ -229,19 +230,21 @@ const viewAllEmp = () => {
             console.log("There are no employees added yet!\r\n");
             init();
         } else {
-            console.log(res);
+            console.table(res);
             init();
         }
     });
 };
 
 const viewAllEmpDep = () => {
-    console.log("test view all emp dep route\r\n");
+    console.log("test view all emp dep route");
     inquirer.prompt(viewEmpDeptQuestions).then(res => {
         connection.query(
             "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department on department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
                 if (err) throw err;
-                console.log(res);
+                console.log("\r\n");
+                console.table(res);
+                conLogRN(res.length);
             });
     }).then(() => {
         init();
@@ -251,7 +254,7 @@ const viewAllEmpDep = () => {
 };
 
 const viewAllEmpManager = () => {
-    console.log("test view all emp manager route\r\n");
+    console.log("test view all emp manager route");
     inquirer.prompt(viewEmpManagerQuestions).then(res => {
         let firstName = res.empManagerChoice.split(" ")[0];
         let lastName = res.empManagerChoice.split(" ")[1];
@@ -261,10 +264,13 @@ const viewAllEmpManager = () => {
                 lastName
             ], (err, res) => {
                 if (err) throw err;
+                console.log("\r\n");
                 if (res.length === 0) {
                     console.log("There are no employees who work under the given employee.");
+                    conLogRN(5);
                 } else {
-                    console.log(res);
+                    console.table(res);
+                    conLogRN(res.length);
                 }
             });
     }).then(() => {
@@ -273,6 +279,18 @@ const viewAllEmpManager = () => {
         console.log(e)
     });
 };
+
+const conLogRN = length => {
+    if (length <= 4) {
+        for (let i = 0; i < length; i++) {
+            console.log("\r\n");
+        }
+    } else if (length > 4) {
+        for (let i = 0; i < 4; i++) {
+            console.log("\r\n");
+        }
+    }
+}
 
 const checkLength = async table => {
     connection.query(`SELECT * FROM ${table}`,
@@ -284,7 +302,6 @@ const checkLength = async table => {
                 }
                 return;
             } else {
-                console.log("\r\ntest false checkLength " + table);
                 switch (table) {
                     case "department":
                         deptChoices.length = 0;
@@ -410,17 +427,21 @@ const updateEmpManager = () => {
         let firstName = res.empChoiceManager.split(" ")[0];
         let lastName = res.empChoiceManager.split(" ")[1];
         console.log(firstName + " " + lastName + " test first name last name");
-        connection.query(
-            "UPDATE employee SET ? WHERE ? AND ?", [{
-                manager_id: findId(managerIds, res.empNewManager)
-            }, {
-                first_name: firstName
-            }, {
-                last_name: lastName
-            }], (err, res) => {
-                if (err) throw err;
-            }
-        );
+        if (firstName === "None") {
+            console.log("None was chosen.");
+        } else {
+            connection.query(
+                "UPDATE employee SET ? WHERE ? AND ?", [{
+                    manager_id: findId(managerIds, res.empNewManager)
+                }, {
+                    first_name: firstName
+                }, {
+                    last_name: lastName
+                }], (err, res) => {
+                    if (err) throw err;
+                }
+            );
+        }
     }).then(() => {
         checkLength("employee");
         init();
