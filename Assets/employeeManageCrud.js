@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
 });
 
 const roleChoices = [];
-const managerChoices = [];
+const employeeChoices = [];
 const deptChoices = [];
 const deptIds = [];
 const roleIds = [];
@@ -106,7 +106,7 @@ const addEmpQuestions = [{
     {
         type: "list",
         message: "Who is the employee's manager?",
-        choices: managerChoices,
+        choices: employeeChoices,
         name: "empManager"
     },
 ];
@@ -114,7 +114,7 @@ const addEmpQuestions = [{
 const updateRoleQuestions = [{
         type: "list",
         message: "Who is the employee that you want to update the role for?",
-        choices: managerChoices,
+        choices: employeeChoices,
         name: "empChoiceRole"
     },
     {
@@ -122,6 +122,20 @@ const updateRoleQuestions = [{
         message: "What is the employee's new role?",
         choices: roleChoices,
         name: "empNewRole"
+    }
+];
+
+const updateManagerQuestions = [{
+        type: "list",
+        message: "Who is the employee that you want to update the manager for?",
+        choices: employeeChoices,
+        name: "empChoiceManager"
+    },
+    {
+        type: "list",
+        message: "Who is the employee's new manager?",
+        choices: employeeChoices,
+        name: "empNewManager"
     }
 ];
 
@@ -135,7 +149,7 @@ const viewEmpDeptQuestions = [{
 const viewEmpManagerQuestions = [{
     type: "list",
     message: "What manager do you want to see all of the employees who work under?",
-    choices: managerChoices,
+    choices: employeeChoices,
     name: "empManagerChoice"
 }];
 
@@ -266,7 +280,7 @@ const checkLength = async table => {
             if (err) throw err;
             if (res.length === 0) {
                 if (table === "employee") {
-                    managerChoices.push("None");
+                    employeeChoices.push("None");
                 }
                 return;
             } else {
@@ -299,7 +313,7 @@ const checkLength = async table => {
                         };
                         break;
                     case "employee":
-                        managerChoices.length = 0;
+                        employeeChoices.length = 0;
                         managerIds.length = 0;
                         for (let i = 0; i < res.length; i++) {
                             let managerName = res[i].first_name + " " + res[i].last_name;
@@ -307,10 +321,10 @@ const checkLength = async table => {
                             let newObj = {
                                 [managerName]: managerId
                             }
-                            managerChoices.push(managerName);
+                            employeeChoices.push(managerName);
                             managerIds.push(newObj);
                         };
-                        managerChoices.push("None");
+                        employeeChoices.push("None");
                         break;
                 }
             }
@@ -364,7 +378,6 @@ const addRole = () => {
     }
 };
 
-
 const updateEmpRole = () => {
     console.log("test update emp role route");
     inquirer.prompt(updateRoleQuestions).then(res => {
@@ -391,9 +404,28 @@ const updateEmpRole = () => {
 }
 
 const updateEmpManager = () => {
-
-
-
+    console.log("test update emp manager route");
+    inquirer.prompt(updateManagerQuestions).then(res => {
+        let firstName = res.empChoiceManager.split(" ")[0];
+        let lastName = res.empChoiceManager.split(" ")[1];
+        console.log(firstName + " " + lastName + " test first name last name");
+        connection.query(
+            "UPDATE employee SET ? WHERE ? AND ?", [{
+                manager_id: findId(managerIds, res.empNewManager)
+            }, {
+                first_name: firstName
+            }, {
+                last_name: lastName
+            }], (err, res) => {
+                if (err) throw err;
+            }
+        );
+    }).then(() => {
+        checkLength("employee");
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
 };
 
 const addEmp = () => {
