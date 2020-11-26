@@ -45,7 +45,7 @@ const numberValidate = async input => {
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
-    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Quit"],
+    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Quit"],
     name: "userToDoRes"
 }];
 
@@ -168,6 +168,9 @@ const init = () => {
                 break;
             case "Update Employee Role":
                 updateEmpRole();
+                break;
+            case "Update Employee Manager":
+                updateEmpManager();
                 break;
             case "Quit":
                 connection.end();
@@ -387,6 +390,12 @@ const updateEmpRole = () => {
     });
 }
 
+const updateEmpManager = () => {
+
+
+
+};
+
 const addEmp = () => {
     let checkDept;
     let checkRole;
@@ -428,41 +437,29 @@ const addEmp = () => {
 };
 
 const getDeptId = department => {
-    let returnThisId;
-    deptIds.forEach((value, index) => {
-        for (let key in value) {
-            if (department === key) {
-                returnThisId = value[key];
-            }
-        }
-    });
-    return returnThisId;
+    return findId(deptIds, department);
 }
 
 const getRoleId = role => {
-    let returnThisId;
-    roleIds.forEach((value, index) => {
-        for (let key in value) {
-            if (role === key) {
-                returnThisId = value[key];
-            }
-        }
-    });
-    return returnThisId;
+    return findId(roleIds, role);
 }
 
 const getManagerId = manager => {
     if (manager === "None") {
         return null;
     } else {
-        let returnThisId;
-        managerIds.forEach((value, index) => {
-            for (let key in value) {
-                if (manager === key) {
-                    returnThisId = value[key];
-                }
-            }
-        });
-        return returnThisId;
+        return findId(managerIds, manager);
     }
+}
+
+const findId = (arrayName, arrayParam) => {
+    let returnThisId;
+    arrayName.forEach((value, index) => {
+        for (let key in value) {
+            if (arrayParam === key) {
+                returnThisId = value[key];
+            }
+        }
+    });
+    return returnThisId;
 }
