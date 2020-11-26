@@ -45,7 +45,7 @@ const numberValidate = async input => {
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
-    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Quit"],
+    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Quit"],
     name: "userToDoRes"
 }];
 
@@ -130,7 +130,14 @@ const viewEmpDeptQuestions = [{
     message: "What department do you want to see all of the employees in?",
     choices: deptChoices,
     name: "empDeptChoice"
-}, ]
+}];
+
+const viewEmpManagerQuestions = [{
+    type: "list",
+    message: "What manager do you want to see all of the employees who work under?",
+    choices: managerChoices,
+    name: "empManagerChoice"
+}];
 
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
@@ -146,6 +153,9 @@ const init = () => {
                 break;
             case "View All Employees By Department":
                 viewAllEmpDep();
+                break;
+            case "View All Employees By Manager":
+                viewAllEmpManager();
                 break;
             case "Add Role":
                 addRole();
@@ -215,6 +225,30 @@ const viewAllEmpDep = () => {
             "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department on department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
                 if (err) throw err;
                 console.log(res);
+            });
+    }).then(() => {
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
+};
+
+const viewAllEmpManager = () => {
+    console.log("test view all emp manager route\r\n");
+    inquirer.prompt(viewEmpManagerQuestions).then(res => {
+        let firstName = res.empManagerChoice.split(" ")[0];
+        let lastName = res.empManagerChoice.split(" ")[1];
+        connection.query(
+            "SELECT t1.first_name, t1.last_name FROM employee t1 INNER JOIN employee t2 ON (t1.manager_id = t2.id) WHERE (t2.first_name = ? AND t2.last_name = ?)", [
+                firstName,
+                lastName
+            ], (err, res) => {
+                if (err) throw err;
+                if (res.length === 0) {
+                    console.log("There are no employees who work under the given employee.");
+                } else {
+                    console.log(res);
+                }
             });
     }).then(() => {
         init();
