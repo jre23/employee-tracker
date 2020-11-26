@@ -380,13 +380,14 @@ const addRole = () => {
 
 const updateEmpRole = () => {
     console.log("test update emp role route");
+    employeeChoices.pop();
     inquirer.prompt(updateRoleQuestions).then(res => {
         let firstName = res.empChoiceRole.split(" ")[0];
         let lastName = res.empChoiceRole.split(" ")[1];
         console.log(firstName + " " + lastName + " test first name last name");
         connection.query(
             "UPDATE employee SET ? WHERE ? AND ?", [{
-                role_id: getRoleId(res.empNewRole)
+                role_id: findId(roleIds, res.empNewRole)
             }, {
                 first_name: firstName
             }, {
