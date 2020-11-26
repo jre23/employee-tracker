@@ -224,7 +224,7 @@ const viewAllRoles = () => {
 
 const viewAllEmp = () => {
     console.log("test view all emp route");
-    connection.query("SELECT * FROM employee", (err, res) => {
+    connection.query("SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e INNER JOIN employee e2 ON e.manager_id = e2.id INNER JOIN role r ON e.role_id = r.id INNER JOIN department d ON r.department_id = d.id", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
             console.log("There are no employees added yet!\r\n");
@@ -241,7 +241,7 @@ const viewAllEmpDep = () => {
     inquirer.prompt(viewEmpDeptQuestions).then(res => {
         let keepEmpDeptChoice = res.empDeptChoice;
         connection.query(
-            "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department on department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
+            "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
                 if (err) throw err;
                 res.unshift({
                     "department": keepEmpDeptChoice,
