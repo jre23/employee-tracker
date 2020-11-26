@@ -239,9 +239,15 @@ const viewAllEmp = () => {
 const viewAllEmpDep = () => {
     console.log("test view all emp dep route");
     inquirer.prompt(viewEmpDeptQuestions).then(res => {
+        let keepEmpDeptChoice = res.empDeptChoice;
         connection.query(
             "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department on department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
                 if (err) throw err;
+                res.unshift({
+                    "department": keepEmpDeptChoice,
+                    "first_name": "X",
+                    "last_name": "X"
+                })
                 console.log("\r\n");
                 console.table(res);
                 conLogRN(res.length);
@@ -269,6 +275,11 @@ const viewAllEmpManager = () => {
                     console.log("There are no employees who work under the given employee.");
                     conLogRN(5);
                 } else {
+                    res.unshift({
+                        "manager": "    -->",
+                        "first_name": firstName,
+                        "last_name": lastName
+                    })
                     console.table(res);
                     conLogRN(res.length);
                 }
