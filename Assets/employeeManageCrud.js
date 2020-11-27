@@ -196,7 +196,7 @@ const init = () => {
 
 const viewAllDep = () => {
     console.log("test view all dep route");
-    connection.query("SELECT * FROM department", (err, res) => {
+    connection.query("SELECT id, name as department FROM department", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
             console.log("There are no departments added yet!\r\n");
@@ -210,7 +210,7 @@ const viewAllDep = () => {
 
 const viewAllRoles = () => {
     console.log("test view all roles route");
-    connection.query("SELECT * FROM role", (err, res) => {
+    connection.query("SELECT id, title as role, salary, department_id FROM role", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
             console.log("There are no roles added yet!\r\n");
@@ -224,7 +224,7 @@ const viewAllRoles = () => {
 
 const viewAllEmp = () => {
     console.log("test view all emp route");
-    connection.query("SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e INNER JOIN employee e2 ON e.manager_id = e2.id INNER JOIN role r ON e.role_id = r.id INNER JOIN department d ON r.department_id = d.id", (err, res) => {
+    connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e INNER JOIN employee e2 ON e.manager_id = e2.id INNER JOIN role r ON e.role_id = r.id INNER JOIN department d ON r.department_id = d.id", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
             console.log("There are no employees added yet!\r\n");
@@ -272,7 +272,7 @@ const viewAllEmpManager = () => {
                 if (err) throw err;
                 console.log("\r\n");
                 if (res.length === 0) {
-                    console.log("There are no employees who work under the given employee.");
+                    console.log("There are no employees who work under the chosen employee.");
                     conLogRN(5);
                 } else {
                     res.unshift({
