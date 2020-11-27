@@ -161,6 +161,13 @@ const deleteDeptQuestions = [{
     name: "delDeptChoice"
 }];
 
+const deleteRoleQuestions = [{
+    type: "list",
+    message: "What role do you want to delete?",
+    choices: roleChoices,
+    name: "delRoleChoice"
+}];
+
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
@@ -196,6 +203,9 @@ const init = () => {
                 break;
             case "Delete Department":
                 deleteDept();
+                break;
+            case "Delete Role":
+                deleteRole();
                 break;
             case "Quit":
                 connection.end();
@@ -234,7 +244,7 @@ const viewAllRoles = () => {
 
 const viewAllEmp = () => {
     console.log("test view all emp route");
-    connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e INNER JOIN employee e2 ON (e.manager_id = e2.id OR e.manager_id = null) INNER JOIN role r ON e.role_id = r.id INNER JOIN department d ON r.department_id = d.id", (err, res) => {
+    connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e LEFT JOIN employee e2 ON (e.manager_id = e2.id OR e.manager_id = null) LEFT JOIN role r ON (e.role_id = r.id or e.role_id = null) LEFT JOIN department d ON (r.department_id = d.id OR r.department_id = null)", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
             console.log("There are no employees added yet!\r\n");
@@ -538,6 +548,23 @@ const deleteDept = () => {
             });
     }).then(() => {
         checkLength("department");
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
+};
+
+const deleteRole = () => {
+    console.log("test delete role function");
+    inquirer.prompt(deleteRoleQuestions).then(res => {
+        connection.query(
+            "DELETE FROM role WHERE ?", {
+                title: res.delRoleChoice,
+            }, (err, res) => {
+                if (err) throw err;
+            });
+    }).then(() => {
+        checkLength("role");
         init();
     }).catch((e) => {
         console.log(e)
