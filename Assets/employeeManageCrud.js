@@ -46,7 +46,7 @@ const numberValidate = async input => {
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
-    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Quit"],
+    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Quit"],
     name: "userToDoRes"
 }];
 
@@ -154,6 +154,13 @@ const viewEmpManagerQuestions = [{
     name: "empManagerChoice"
 }];
 
+const deleteDeptQuestions = [{
+    type: "list",
+    message: "What department do you want to delete?",
+    choices: deptChoices,
+    name: "delDeptChoice"
+}];
+
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
@@ -186,6 +193,9 @@ const init = () => {
                 break;
             case "Update Employee Manager":
                 updateEmpManager();
+                break;
+            case "Delete Department":
+                deleteDept();
                 break;
             case "Quit":
                 connection.end();
@@ -224,7 +234,7 @@ const viewAllRoles = () => {
 
 const viewAllEmp = () => {
     console.log("test view all emp route");
-    connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e INNER JOIN employee e2 ON e.manager_id = e2.id INNER JOIN role r ON e.role_id = r.id INNER JOIN department d ON r.department_id = d.id", (err, res) => {
+    connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e INNER JOIN employee e2 ON (e.manager_id = e2.id OR e.manager_id = null) INNER JOIN role r ON e.role_id = r.id INNER JOIN department d ON r.department_id = d.id", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
             console.log("There are no employees added yet!\r\n");
@@ -516,3 +526,20 @@ const findId = (arrayName, arrayParam) => {
         return returnThisId;
     }
 }
+
+const deleteDept = () => {
+    console.log("test delete dept function");
+    inquirer.prompt(deleteDeptQuestions).then(res => {
+        connection.query(
+            "DELETE FROM department WHERE ?", {
+                name: res.delDeptChoice,
+            }, (err, res) => {
+                if (err) throw err;
+            });
+    }).then(() => {
+        checkLength("department");
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
+};
