@@ -168,6 +168,13 @@ const deleteRoleQuestions = [{
     name: "delRoleChoice"
 }];
 
+const deleteEmpQuestions = [{
+    type: "list",
+    message: "Who is the employee that you want to delete?",
+    choices: employeeChoices,
+    name: "delEmpChoice"
+}];
+
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
@@ -206,6 +213,9 @@ const init = () => {
                 break;
             case "Delete Role":
                 deleteRole();
+                break;
+            case "Delete Employee":
+                deleteEmployee();
                 break;
             case "Quit":
                 connection.end();
@@ -565,6 +575,32 @@ const deleteRole = () => {
             });
     }).then(() => {
         checkLength("role");
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
+};
+
+const deleteEmployee = () => {
+    console.log("test delete employee function");
+    inquirer.prompt(deleteEmpQuestions).then(res => {
+        let firstName = res.delEmpChoice.split(" ")[0];
+        let lastName = res.delEmpChoice.split(" ")[1];
+        if (firstName === "None") {
+            console.log("None was chosen.\r\n");
+        } else {
+            connection.query(
+                "DELETE FROM employee WHERE ? AND ?", [{
+                    first_name: firstName
+                }, {
+                    last_name: lastName
+                }], (err, res) => {
+                    if (err) throw err;
+                }
+            );
+        }
+    }).then(() => {
+        checkLength("employee");
         init();
     }).catch((e) => {
         console.log(e)
