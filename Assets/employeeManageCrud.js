@@ -46,7 +46,7 @@ const numberValidate = async input => {
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
-    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Quit"],
+    choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "View Total Utilized Budget By Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Quit"],
     name: "userToDoRes"
 }];
 
@@ -154,6 +154,13 @@ const viewEmpManagerQuestions = [{
     name: "empManagerChoice"
 }];
 
+const viewBudgetDepQuestions = [{
+    type: "list",
+    message: "What department do you want to see the total utilized budget for?",
+    choices: deptChoices,
+    name: "budgetDepChoice"
+}];
+
 const deleteDeptQuestions = [{
     type: "list",
     message: "What department do you want to delete?",
@@ -192,6 +199,9 @@ const init = () => {
                 break;
             case "View All Employees By Manager":
                 viewAllEmpManager();
+                break;
+            case "View Total Utilized Budget By Department":
+                viewBudgetDep();
                 break;
             case "Add Role":
                 addRole();
@@ -302,7 +312,7 @@ const viewAllEmpManager = () => {
                 if (err) throw err;
                 console.log("\r\n");
                 if (res.length === 0) {
-                    console.log("There are no employees who work under the chosen employee.");
+                    console.log("There are no employees who work under the chosen employee.\r\n");
                     conLogRN(5);
                 } else {
                     res.unshift({
@@ -601,6 +611,30 @@ const deleteEmployee = () => {
         }
     }).then(() => {
         checkLength("employee");
+        init();
+    }).catch((e) => {
+        console.log(e)
+    });
+};
+
+// View the total utilized budget of a department -- ie the combined salaries of all employees in that department
+const viewBudgetDep = () => {
+    console.log("test view total budget dep route");
+    inquirer.prompt(viewBudgetDepQuestions).then(res => {
+        let keepEmpDeptChoice = res.budgetDepChoice;
+        connection.query(
+            "SELECT sum(salary) as total_budget FROM role INNER JOIN employee ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.budgetDepChoice], (err, res) => {
+                if (err) throw err;
+                let totalBudget = res[0].total_budget;
+                let newResponse = [{
+                    "department": keepEmpDeptChoice,
+                    "total_budget": totalBudget
+                }];
+                console.log("\r\n");
+                console.table(newResponse);
+                conLogRN(newResponse.length);
+            });
+    }).then(() => {
         init();
     }).catch((e) => {
         console.log(e)
