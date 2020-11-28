@@ -231,6 +231,7 @@ const viewAllDep = () => {
             console.log("\r\nThere are no departments added yet!\r\n");
             init();
         } else {
+            console.log("\r\n");
             console.table(res);
             init();
         }
@@ -244,6 +245,7 @@ const viewAllRoles = () => {
             console.log("\r\nThere are no roles added yet!\r\n");
             init();
         } else {
+            console.log("\r\n");
             console.table(res);
             init();
         }
@@ -257,6 +259,7 @@ const viewAllEmp = () => {
             console.log("\r\nThere are no employees added yet!\r\n");
             init();
         } else {
+            console.log("\r\n");
             console.table(res);
             init();
         }
@@ -284,7 +287,7 @@ const viewAllEmpDep = () => {
                         })
                         console.log("\r\n");
                         console.table(res);
-                        conLogRN(res.length);
+                        conLogRN(5);
                     }
                 });
         }).then(() => {
@@ -492,9 +495,8 @@ const updateEmpManager = () => {
         inquirer.prompt(updateManagerQuestions).then(res => {
             let firstName = res.empChoiceManager.split(" ")[0];
             let lastName = res.empChoiceManager.split(" ")[1];
-            console.log(firstName + " " + lastName + " test first name last name");
             if (firstName === "None") {
-                console.log("None was chosen.");
+                console.log("\r\nNone was chosen.\r\n");
             } else {
                 connection.query(
                     "UPDATE employee SET ? WHERE ? AND ?", [{
@@ -518,23 +520,11 @@ const updateEmpManager = () => {
 };
 
 const addEmp = () => {
-    let checkDept;
-    let checkRole;
     if (deptChoices.length === 0) {
-        checkDept = true;
-    } else {
-        checkDept = false;
-    }
-    if (roleChoices.length === 0) {
-        checkRole = true;
-    } else {
-        checkRole = false;
-    }
-    if (checkDept) {
-        console.log("Please add a department before adding any employees!\r\n");
+        console.log("\r\nPlease add a department before adding any employees!\r\n");
         init();
-    } else if (checkRole) {
-        console.log("Please add a role before adding any employees!\r\n");
+    } else if (roleChoices.length === 0) {
+        console.log("\r\nPlease add a role before adding any employees!\r\n");
         init();
     } else {
         inquirer.prompt(addEmpQuestions).then(res => {
@@ -626,28 +616,33 @@ const deleteRole = () => {
 };
 
 const deleteEmployee = () => {
-    inquirer.prompt(deleteEmpQuestions).then(res => {
-        let firstName = res.delEmpChoice.split(" ")[0];
-        let lastName = res.delEmpChoice.split(" ")[1];
-        if (firstName === "None") {
-            console.log("None was chosen.\r\n");
-        } else {
-            connection.query(
-                "DELETE FROM employee WHERE ? AND ?", [{
-                    first_name: firstName
-                }, {
-                    last_name: lastName
-                }], (err, res) => {
-                    if (err) throw err;
-                }
-            );
-        }
-    }).then(() => {
-        checkLength("employee");
+    if (employeeChoices.length === 1) {
+        console.log("\r\nThere are no employees added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        inquirer.prompt(deleteEmpQuestions).then(res => {
+            let firstName = res.delEmpChoice.split(" ")[0];
+            let lastName = res.delEmpChoice.split(" ")[1];
+            if (firstName === "None") {
+                console.log("\r\nNone was chosen.\r\n");
+            } else {
+                connection.query(
+                    "DELETE FROM employee WHERE ? AND ?", [{
+                        first_name: firstName
+                    }, {
+                        last_name: lastName
+                    }], (err, res) => {
+                        if (err) throw err;
+                    }
+                );
+            }
+        }).then(() => {
+            checkLength("employee");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
 
 const viewBudgetDep = () => {
