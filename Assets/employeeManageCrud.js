@@ -225,11 +225,10 @@ const init = () => {
 }
 
 const viewAllDep = () => {
-    console.log("test view all dep route");
     connection.query("SELECT id, name as department FROM department", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
-            console.log("There are no departments added yet!\r\n");
+            console.log("\r\nThere are no departments added yet!\r\n");
             init();
         } else {
             console.table(res);
@@ -239,11 +238,10 @@ const viewAllDep = () => {
 };
 
 const viewAllRoles = () => {
-    console.log("test view all roles route");
     connection.query("SELECT id, title as role, salary, department_id FROM role", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
-            console.log("There are no roles added yet!\r\n");
+            console.log("\r\nThere are no roles added yet!\r\n");
             init();
         } else {
             console.table(res);
@@ -253,11 +251,10 @@ const viewAllRoles = () => {
 };
 
 const viewAllEmp = () => {
-    console.log("test view all emp route");
     connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e LEFT JOIN employee e2 ON (e.manager_id = e2.id OR e.manager_id = null) LEFT JOIN role r ON (e.role_id = r.id or e.role_id = null) LEFT JOIN department d ON (r.department_id = d.id OR r.department_id = null)", (err, res) => {
         if (err) throw err;
         if (res.length === 0) {
-            console.log("There are no employees added yet!\r\n");
+            console.log("\r\nThere are no employees added yet!\r\n");
             init();
         } else {
             console.table(res);
@@ -299,7 +296,6 @@ const viewAllEmpDep = () => {
 };
 
 const viewAllEmpManager = () => {
-    console.log("test view all emp manager route");
     inquirer.prompt(viewEmpManagerQuestions).then(res => {
         let firstName = res.empManagerChoice.split(" ")[0];
         let lastName = res.empManagerChoice.split(" ")[1];
@@ -343,7 +339,21 @@ const conLogRN = length => {
 }
 
 const checkLength = async table => {
-    connection.query(`SELECT * FROM ${table}`,
+    let query = "";
+    switch (table) {
+        case "department":
+            query = "SELECT * FROM department";
+            break;
+        case "role":
+            query = "SELECT * FROM role";
+            break;
+        case "employee":
+            query = "SELECT * FROM employee";
+            break;
+        default:
+            connection.end();
+    }
+    connection.query(query,
         (err, res) => {
             if (err) throw err;
             if (res.length === 0) {
@@ -415,7 +425,6 @@ const addDept = () => {
 }
 
 const addRole = () => {
-    console.log("test add role route");
     if (deptChoices.length === 0) {
         checkDept = true;
     } else {
@@ -446,43 +455,18 @@ const addRole = () => {
 };
 
 const updateEmpRole = () => {
-    console.log("test update emp role route");
     employeeChoices.pop();
-    inquirer.prompt(updateRoleQuestions).then(res => {
-        let firstName = res.empChoiceRole.split(" ")[0];
-        let lastName = res.empChoiceRole.split(" ")[1];
-        console.log(firstName + " " + lastName + " test first name last name");
-        connection.query(
-            "UPDATE employee SET ? WHERE ? AND ?", [{
-                role_id: findId(roleIds, res.empNewRole)
-            }, {
-                first_name: firstName
-            }, {
-                last_name: lastName
-            }], (err, res) => {
-                if (err) throw err;
-            }
-        );
-    }).then(() => {
-        checkLength("employee");
+    if (employeeChoices.length === 0) {
+        console.log("\r\nThere are no employees added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
-}
-
-const updateEmpManager = () => {
-    console.log("test update emp manager route");
-    inquirer.prompt(updateManagerQuestions).then(res => {
-        let firstName = res.empChoiceManager.split(" ")[0];
-        let lastName = res.empChoiceManager.split(" ")[1];
-        console.log(firstName + " " + lastName + " test first name last name");
-        if (firstName === "None") {
-            console.log("None was chosen.");
-        } else {
+    } else {
+        inquirer.prompt(updateRoleQuestions).then(res => {
+            let firstName = res.empChoiceRole.split(" ")[0];
+            let lastName = res.empChoiceRole.split(" ")[1];
+            console.log(firstName + " " + lastName + " test first name last name");
             connection.query(
                 "UPDATE employee SET ? WHERE ? AND ?", [{
-                    manager_id: findId(managerIds, res.empNewManager)
+                    role_id: findId(roleIds, res.empNewRole)
                 }, {
                     first_name: firstName
                 }, {
@@ -491,13 +475,46 @@ const updateEmpManager = () => {
                     if (err) throw err;
                 }
             );
-        }
-    }).then(() => {
-        checkLength("employee");
+        }).then(() => {
+            checkLength("employee");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
+}
+
+const updateEmpManager = () => {
+    if (employeeChoices.length === 1) {
+        console.log("\r\nThere are no employees added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        inquirer.prompt(updateManagerQuestions).then(res => {
+            let firstName = res.empChoiceManager.split(" ")[0];
+            let lastName = res.empChoiceManager.split(" ")[1];
+            console.log(firstName + " " + lastName + " test first name last name");
+            if (firstName === "None") {
+                console.log("None was chosen.");
+            } else {
+                connection.query(
+                    "UPDATE employee SET ? WHERE ? AND ?", [{
+                        manager_id: findId(managerIds, res.empNewManager)
+                    }, {
+                        first_name: firstName
+                    }, {
+                        last_name: lastName
+                    }], (err, res) => {
+                        if (err) throw err;
+                    }
+                );
+            }
+        }).then(() => {
+            checkLength("employee");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
 
 const addEmp = () => {
@@ -557,24 +574,32 @@ const findId = (arrayName, arrayParam) => {
 }
 
 const deleteDept = () => {
-    console.log("test delete dept function");
-    inquirer.prompt(deleteDeptQuestions).then(res => {
-        connection.query(
-            "DELETE FROM department WHERE ?", {
-                name: res.delDeptChoice,
-            }, (err, res) => {
-                if (err) throw err;
-            });
-    }).then(() => {
-        checkLength("department");
+    if (deptChoices.length === 0) {
+        console.log("\r\nThere are no departments added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        deptChoices.push("None");
+        inquirer.prompt(deleteDeptQuestions).then(res => {
+            if (res.delDeptChoice === "None") {
+                console.log("\r\nNone selected.\r\n");
+            } else {
+                connection.query(
+                    "DELETE FROM department WHERE ?", {
+                        name: res.delDeptChoice,
+                    }, (err, res) => {
+                        if (err) throw err;
+                    });
+            }
+        }).then(() => {
+            checkLength("department");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
 
 const deleteRole = () => {
-    console.log("test delete role function");
     inquirer.prompt(deleteRoleQuestions).then(res => {
         connection.query(
             "DELETE FROM role WHERE ?", {
@@ -591,7 +616,6 @@ const deleteRole = () => {
 };
 
 const deleteEmployee = () => {
-    console.log("test delete employee function");
     inquirer.prompt(deleteEmpQuestions).then(res => {
         let firstName = res.delEmpChoice.split(" ")[0];
         let lastName = res.delEmpChoice.split(" ")[1];
@@ -617,7 +641,6 @@ const deleteEmployee = () => {
 };
 
 const viewBudgetDep = () => {
-    console.log("test view total budget dep route");
     inquirer.prompt(viewBudgetDepQuestions).then(res => {
         let keepEmpDeptChoice = res.budgetDepChoice;
         connection.query(
