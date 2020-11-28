@@ -600,19 +600,29 @@ const deleteDept = () => {
 };
 
 const deleteRole = () => {
-    inquirer.prompt(deleteRoleQuestions).then(res => {
-        connection.query(
-            "DELETE FROM role WHERE ?", {
-                title: res.delRoleChoice,
-            }, (err, res) => {
-                if (err) throw err;
-            });
-    }).then(() => {
-        checkLength("role");
+    if (roleChoices.length === 0) {
+        console.log("\r\nThere are no roles added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        roleChoices.push("None");
+        inquirer.prompt(deleteRoleQuestions).then(res => {
+            if (res.delRoleChoice === "None") {
+                console.log("\r\nNone selected.\r\n");
+            } else {
+                connection.query(
+                    "DELETE FROM role WHERE ?", {
+                        title: res.delRoleChoice,
+                    }, (err, res) => {
+                        if (err) throw err;
+                    });
+            }
+        }).then(() => {
+            checkLength("role");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
 
 const deleteEmployee = () => {
