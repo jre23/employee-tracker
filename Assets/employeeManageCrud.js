@@ -299,34 +299,39 @@ const viewAllEmpDep = () => {
 };
 
 const viewAllEmpManager = () => {
-    inquirer.prompt(viewEmpManagerQuestions).then(res => {
-        let firstName = res.empManagerChoice.split(" ")[0];
-        let lastName = res.empManagerChoice.split(" ")[1];
-        connection.query(
-            "SELECT t1.first_name, t1.last_name FROM employee t1 INNER JOIN employee t2 ON (t1.manager_id = t2.id) WHERE (t2.first_name = ? AND t2.last_name = ?)", [
-                firstName,
-                lastName
-            ], (err, res) => {
-                if (err) throw err;
-                console.log("\r\n");
-                if (res.length === 0) {
-                    console.log("There are no employees who work under the chosen employee.\r\n");
-                    conLogRN(5);
-                } else {
-                    res.unshift({
-                        "manager": "    -->",
-                        "first_name": firstName,
-                        "last_name": lastName
-                    })
-                    console.table(res);
-                    conLogRN(res.length);
-                }
-            });
-    }).then(() => {
+    if (employeeChoices.length === 1) {
+        console.log("\r\nThere are no employees added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        inquirer.prompt(viewEmpManagerQuestions).then(res => {
+            let firstName = res.empManagerChoice.split(" ")[0];
+            let lastName = res.empManagerChoice.split(" ")[1];
+            connection.query(
+                "SELECT t1.first_name, t1.last_name FROM employee t1 INNER JOIN employee t2 ON (t1.manager_id = t2.id) WHERE (t2.first_name = ? AND t2.last_name = ?)", [
+                    firstName,
+                    lastName
+                ], (err, res) => {
+                    if (err) throw err;
+                    console.log("\r\n");
+                    if (res.length === 0) {
+                        console.log("There are no employees who work under the chosen employee.\r\n");
+                        conLogRN(5);
+                    } else {
+                        res.unshift({
+                            "manager": "    -->",
+                            "first_name": firstName,
+                            "last_name": lastName
+                        })
+                        console.table(res);
+                        conLogRN(res.length);
+                    }
+                });
+        }).then(() => {
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
 
 const conLogRN = length => {
