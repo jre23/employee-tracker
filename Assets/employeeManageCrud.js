@@ -42,22 +42,12 @@ const numberValidate = async input => {
     }
 }
 // array holding questions to determine if user wants to view, add, remove, or update
-// mvp
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
     choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "View Total Utilized Budget By Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Quit"],
     name: "userToDoRes"
 }];
-
-// bonus
-// const userToDo = [{
-//     type: "list",
-//     message: "Hello and welcome to the Employee Manager app! What would you like to do?",
-//     choices: ["View All Employees", "View All Departments", "View All Employees By Department", "View All Employees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles", "Add Role", "Remove Role", "Remove Department"],
-//     name: "userToDoRes"
-// }];
-// "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"
 
 const addDeptQuestions = [{
     type: "input",
@@ -277,26 +267,35 @@ const viewAllEmp = () => {
 };
 
 const viewAllEmpDep = () => {
-    console.log("test view all emp dep route");
-    inquirer.prompt(viewEmpDeptQuestions).then(res => {
-        let keepEmpDeptChoice = res.empDeptChoice;
-        connection.query(
-            "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
-                if (err) throw err;
-                res.unshift({
-                    "department": keepEmpDeptChoice,
-                    "first_name": "X",
-                    "last_name": "X"
-                })
-                console.log("\r\n");
-                console.table(res);
-                conLogRN(res.length);
-            });
-    }).then(() => {
+    if (deptChoices.length === 0) {
+        console.log("\r\nThere are no departments added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        inquirer.prompt(viewEmpDeptQuestions).then(res => {
+            let keepEmpDeptChoice = res.empDeptChoice;
+            connection.query(
+                "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
+                    if (err) throw err;
+                    if (res.length === 0) {
+                        console.log("\r\n\r\nThere are no employees added yet!\r\n");
+                        conLogRN(5);
+                    } else {
+                        res.unshift({
+                            "department": keepEmpDeptChoice,
+                            "first_name": "X",
+                            "last_name": "X"
+                        })
+                        console.log("\r\n");
+                        console.table(res);
+                        conLogRN(res.length);
+                    }
+                });
+        }).then(() => {
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
 
 const viewAllEmpManager = () => {
@@ -617,7 +616,6 @@ const deleteEmployee = () => {
     });
 };
 
-// View the total utilized budget of a department -- ie the combined salaries of all employees in that department
 const viewBudgetDep = () => {
     console.log("test view total budget dep route");
     inquirer.prompt(viewBudgetDepQuestions).then(res => {
@@ -632,7 +630,7 @@ const viewBudgetDep = () => {
                 }];
                 console.log("\r\n");
                 console.table(newResponse);
-                conLogRN(newResponse.length);
+                conLogRN(5);
             });
     }).then(() => {
         init();
