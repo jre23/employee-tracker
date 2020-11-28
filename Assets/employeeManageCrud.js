@@ -651,23 +651,28 @@ const deleteEmployee = () => {
 };
 
 const viewBudgetDep = () => {
-    inquirer.prompt(viewBudgetDepQuestions).then(res => {
-        let keepEmpDeptChoice = res.budgetDepChoice;
-        connection.query(
-            "SELECT sum(salary) as total_budget FROM role INNER JOIN employee ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.budgetDepChoice], (err, res) => {
-                if (err) throw err;
-                let totalBudget = res[0].total_budget;
-                let newResponse = [{
-                    "department": keepEmpDeptChoice,
-                    "total_budget": totalBudget
-                }];
-                console.log("\r\n");
-                console.table(newResponse);
-                conLogRN(5);
-            });
-    }).then(() => {
+    if (employeeChoices.length === 1) {
+        console.log("\r\nThere are no employees added yet!\r\n");
         init();
-    }).catch((e) => {
-        console.log(e)
-    });
+    } else {
+        inquirer.prompt(viewBudgetDepQuestions).then(res => {
+            let keepEmpDeptChoice = res.budgetDepChoice;
+            connection.query(
+                "SELECT sum(salary) as total_budget FROM role INNER JOIN employee ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.budgetDepChoice], (err, res) => {
+                    if (err) throw err;
+                    let totalBudget = res[0].total_budget;
+                    let newResponse = [{
+                        "department": keepEmpDeptChoice,
+                        "total_budget": totalBudget
+                    }];
+                    console.log("\r\n");
+                    console.table(newResponse);
+                    conLogRN(5);
+                });
+        }).then(() => {
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
 };
