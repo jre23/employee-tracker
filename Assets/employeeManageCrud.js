@@ -462,6 +462,9 @@ const updateEmpRole = () => {
     if (employeeChoices.length === 0) {
         console.log("\r\nThere are no employees added yet!\r\n");
         init();
+    } else if (roleChoices.length === 0) {
+        console.log("\r\nThere are no roles added yet!\r\n");
+        init();
     } else {
         inquirer.prompt(updateRoleQuestions).then(res => {
             let firstName = res.empChoiceRole.split(" ")[0];
