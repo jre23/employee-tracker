@@ -401,12 +401,12 @@ const checkLength = async table => {
                         employeeChoices.length = 0;
                         managerIds.length = 0;
                         for (let i = 0; i < res.length; i++) {
-                            let managerName = res[i].first_name + " " + res[i].last_name;
+                            let fullName = res[i].first_name + " " + res[i].last_name;
                             let managerId = res[i].id;
                             let newObj = {
-                                [managerName]: managerId
+                                [fullName]: managerId
                             }
-                            employeeChoices.push(managerName);
+                            employeeChoices.push(fullName);
                             managerIds.push(newObj);
                         };
                         employeeChoices.push("None");
@@ -434,11 +434,6 @@ const addDept = () => {
 
 const addRole = () => {
     if (deptChoices.length === 0) {
-        checkDept = true;
-    } else {
-        checkDept = false;
-    }
-    if (checkDept) {
         console.log("Please add a department before adding any roles!\r\n");
         init();
     } else {
