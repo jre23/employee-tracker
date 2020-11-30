@@ -22,13 +22,13 @@ The goal for this project was to build an employee tracking app using MySQL and 
 
 ## Screenshots
 
-![employee tracker screenshot 1]()
+![employee tracker screenshot 1](https://user-images.githubusercontent.com/69170823/100570441-a417e280-3285-11eb-85a2-f57c2e0dc13a.png)
 
-![employee tracker screenshot 2]()
+![employee tracker screenshot 2](https://user-images.githubusercontent.com/69170823/100570543-d9bccb80-3285-11eb-8441-e00979a112fd.png)
 
-![employee tracker screenshot 3]()
+![employee tracker screenshot 3](https://user-images.githubusercontent.com/69170823/100570612-01139880-3286-11eb-9d02-5b2f6bf6e3ee.png)
 
-![employee tracker screenshot 4]()
+![employee tracker screenshot 4](https://user-images.githubusercontent.com/69170823/100570930-ba726e00-3286-11eb-99d5-dcd0ddf6eb90.png)
 
 ## Technologies
 
