@@ -346,7 +346,7 @@ const conLogRN = length => {
     }
 }
 
-const checkLength = async table => {
+const checkLength = table => {
     let query = "";
     switch (table) {
         case "department":
@@ -366,6 +366,7 @@ const checkLength = async table => {
             if (err) throw err;
             if (res.length === 0) {
                 if (table === "employee") {
+                    employeeChoices.length = 0;
                     employeeChoices.push("None");
                 }
                 return;
@@ -457,72 +458,8 @@ const addRole = () => {
     }
 };
 
-const updateEmpRole = () => {
-    employeeChoices.pop();
-    if (employeeChoices.length === 0) {
-        console.log("\r\nThere are no employees added yet!\r\n");
-        init();
-    } else if (roleChoices.length === 0) {
-        console.log("\r\nThere are no roles added yet!\r\n");
-        init();
-    } else {
-        inquirer.prompt(updateRoleQuestions).then(res => {
-            let firstName = res.empChoiceRole.split(" ")[0];
-            let lastName = res.empChoiceRole.split(" ")[1];
-            console.log(firstName + " " + lastName + " test first name last name");
-            connection.query(
-                "UPDATE employee SET ? WHERE ? AND ?", [{
-                    role_id: findId(roleIds, res.empNewRole)
-                }, {
-                    first_name: firstName
-                }, {
-                    last_name: lastName
-                }], (err, res) => {
-                    if (err) throw err;
-                }
-            );
-        }).then(() => {
-            checkLength("employee");
-            init();
-        }).catch((e) => {
-            console.log(e)
-        });
-    }
-}
-
-const updateEmpManager = () => {
-    if (employeeChoices.length === 1) {
-        console.log("\r\nThere are no employees added yet!\r\n");
-        init();
-    } else {
-        inquirer.prompt(updateManagerQuestions).then(res => {
-            let firstName = res.empChoiceManager.split(" ")[0];
-            let lastName = res.empChoiceManager.split(" ")[1];
-            if (firstName === "None") {
-                console.log("\r\nNone was chosen.\r\n");
-            } else {
-                connection.query(
-                    "UPDATE employee SET ? WHERE ? AND ?", [{
-                        manager_id: findId(managerIds, res.empNewManager)
-                    }, {
-                        first_name: firstName
-                    }, {
-                        last_name: lastName
-                    }], (err, res) => {
-                        if (err) throw err;
-                    }
-                );
-            }
-        }).then(() => {
-            checkLength("employee");
-            init();
-        }).catch((e) => {
-            console.log(e)
-        });
-    }
-};
-
 const addEmp = () => {
+    checkLength("employee");
     if (deptChoices.length === 0) {
         console.log("\r\nPlease add a department before adding any employees!\r\n");
         init();
@@ -550,6 +487,76 @@ const addEmp = () => {
     }
 };
 
+const updateEmpRole = () => {
+    checkLength("employee");
+    if (employeeChoices.length === 1) {
+        console.log("\r\nThere are no employees added yet!\r\n");
+        init();
+    } else if (roleChoices.length === 0) {
+        console.log("\r\nThere are no roles added yet!\r\n");
+        init();
+    } else {
+        inquirer.prompt(updateRoleQuestions).then(res => {
+            let firstName = res.empChoiceRole.split(" ")[0];
+            let lastName = res.empChoiceRole.split(" ")[1];
+            if (firstName === "None") {
+                console.log("\r\nNone selected.\r\n");
+            } else {
+                connection.query(
+                    "UPDATE employee SET ? WHERE ? AND ?", [{
+                        role_id: findId(roleIds, res.empNewRole)
+                    }, {
+                        first_name: firstName
+                    }, {
+                        last_name: lastName
+                    }], (err, res) => {
+                        if (err) throw err;
+                    }
+                );
+            }
+        }).then(() => {
+            checkLength("employee");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
+}
+
+const updateEmpManager = () => {
+    checkLength("employee");
+    if (employeeChoices.length === 1) {
+        console.log("\r\nThere are no employees added yet!\r\n");
+        init();
+    } else {
+        inquirer.prompt(updateManagerQuestions).then(res => {
+            let firstName = res.empChoiceManager.split(" ")[0];
+            let lastName = res.empChoiceManager.split(" ")[1];
+            if (firstName === "None") {
+                console.log("\r\nNone selected.\r\n");
+            } else {
+                connection.query(
+                    "UPDATE employee SET ? WHERE ? AND ?", [{
+                        manager_id: findId(managerIds, res.empNewManager)
+                    }, {
+                        first_name: firstName
+                    }, {
+                        last_name: lastName
+                    }], (err, res) => {
+                        if (err) throw err;
+                    }
+                );
+            }
+            // employeeChoices.pop();
+        }).then(() => {
+            checkLength("employee");
+            init();
+        }).catch((e) => {
+            console.log(e)
+        });
+    }
+};
+
 const findId = (arrayName, arrayParam) => {
     if (arrayParam === "None") {
         return null;
@@ -567,6 +574,7 @@ const findId = (arrayName, arrayParam) => {
 }
 
 const deleteDept = () => {
+    checkLength("department");
     if (deptChoices.length === 0) {
         console.log("\r\nThere are no departments added yet!\r\n");
         init();
@@ -583,6 +591,7 @@ const deleteDept = () => {
                         if (err) throw err;
                     });
             }
+            deptChoices.pop();
         }).then(() => {
             checkLength("department");
             init();
@@ -593,6 +602,7 @@ const deleteDept = () => {
 };
 
 const deleteRole = () => {
+    checkLength("role");
     if (roleChoices.length === 0) {
         console.log("\r\nThere are no roles added yet!\r\n");
         init();
@@ -609,6 +619,7 @@ const deleteRole = () => {
                         if (err) throw err;
                     });
             }
+            roleChoices.pop();
         }).then(() => {
             checkLength("role");
             init();
@@ -619,6 +630,7 @@ const deleteRole = () => {
 };
 
 const deleteEmployee = () => {
+    checkLength("employee");
     if (employeeChoices.length === 1) {
         console.log("\r\nThere are no employees added yet!\r\n");
         init();
@@ -627,7 +639,7 @@ const deleteEmployee = () => {
             let firstName = res.delEmpChoice.split(" ")[0];
             let lastName = res.delEmpChoice.split(" ")[1];
             if (firstName === "None") {
-                console.log("\r\nNone was chosen.\r\n");
+                console.log("\r\nNone selected.\r\n");
             } else {
                 connection.query(
                     "DELETE FROM employee WHERE ? AND ?", [{
@@ -639,6 +651,7 @@ const deleteEmployee = () => {
                     }
                 );
             }
+            // employeeChoices.pop();
         }).then(() => {
             checkLength("employee");
             init();
