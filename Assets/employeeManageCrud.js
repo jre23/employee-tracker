@@ -1,7 +1,8 @@
+// require dependencies
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const consoleTable = require("console.table");
-
+// create connection variable
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -9,14 +10,14 @@ const connection = mysql.createConnection({
     password: "password",
     database: "employee_managementDB"
 });
-
+// create empty arrays to hold choices and ids
 const roleChoices = [];
 const employeeChoices = [];
 const deptChoices = [];
 const deptIds = [];
 const roleIds = [];
 const managerIds = [];
-
+// create connection with mysql database
 connection.connect(err => {
     if (err) throw err;
     console.log("Connection successful!");
@@ -41,21 +42,21 @@ const numberValidate = async input => {
         return true;
     }
 }
-// array holding questions to determine if user wants to view, add, remove, or update
+// array holding questions to determine if user wants to view, add, update, or delete
 const userToDo = [{
     type: "list",
     message: "What would you like to do?",
     choices: ["View All Departments", "View All Roles", "View All Employees", "View All Employees By Department", "View All Employees By Manager", "View Total Utilized Budget By Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Quit"],
     name: "userToDoRes"
 }];
-
+// add department questions
 const addDeptQuestions = [{
     type: "input",
     message: "What is the department name?",
     name: "deptName",
     validate: stringValidate
 }]
-
+// add role questions
 const addRoleQuestions = [{
         type: "input",
         message: "What is the name of the role?",
@@ -75,7 +76,7 @@ const addRoleQuestions = [{
         name: "roleDept"
     },
 ];
-
+// add employee questions
 const addEmpQuestions = [{
         type: "input",
         message: "What is the employee's first name?",
@@ -101,7 +102,7 @@ const addEmpQuestions = [{
         name: "empManager"
     },
 ];
-
+// update role questions
 const updateRoleQuestions = [{
         type: "list",
         message: "Who is the employee that you want to update the role for?",
@@ -115,7 +116,7 @@ const updateRoleQuestions = [{
         name: "empNewRole"
     }
 ];
-
+// update manager questions
 const updateManagerQuestions = [{
         type: "list",
         message: "Who is the employee that you want to update the manager for?",
@@ -129,49 +130,49 @@ const updateManagerQuestions = [{
         name: "empNewManager"
     }
 ];
-
+// view employees by department questions
 const viewEmpDeptQuestions = [{
     type: "list",
     message: "What department do you want to see all of the employees in?",
     choices: deptChoices,
     name: "empDeptChoice"
 }];
-
+// view employees by manager questions
 const viewEmpManagerQuestions = [{
     type: "list",
     message: "What manager do you want to see all of the employees who work under?",
     choices: employeeChoices,
     name: "empManagerChoice"
 }];
-
+// view budget by department questions
 const viewBudgetDepQuestions = [{
     type: "list",
     message: "What department do you want to see the total utilized budget for?",
     choices: deptChoices,
     name: "budgetDepChoice"
 }];
-
+// delete department questions
 const deleteDeptQuestions = [{
     type: "list",
     message: "What department do you want to delete?",
     choices: deptChoices,
     name: "delDeptChoice"
 }];
-
+// delete role questions
 const deleteRoleQuestions = [{
     type: "list",
     message: "What role do you want to delete?",
     choices: roleChoices,
     name: "delRoleChoice"
 }];
-
+// delete employee questions
 const deleteEmpQuestions = [{
     type: "list",
     message: "Who is the employee that you want to delete?",
     choices: employeeChoices,
     name: "delEmpChoice"
 }];
-
+// function to initialize app and roues the user depending on user input
 const init = () => {
     inquirer.prompt(userToDo).then(res => {
         switch (res.userToDoRes) {
@@ -223,7 +224,7 @@ const init = () => {
         }
     });
 }
-
+// function to view all departments
 const viewAllDep = () => {
     connection.query("SELECT id, name as department FROM department", (err, res) => {
         if (err) throw err;
@@ -237,7 +238,7 @@ const viewAllDep = () => {
         }
     });
 };
-
+// function to view all roles
 const viewAllRoles = () => {
     connection.query("SELECT id, title as role, salary, department_id FROM role", (err, res) => {
         if (err) throw err;
@@ -251,7 +252,7 @@ const viewAllRoles = () => {
         }
     });
 };
-
+// function to view all employees. makes us of table aliases. reference: https://www.mysqltutorial.org/mysql-left-join.aspx
 const viewAllEmp = () => {
     connection.query("SELECT e.id, e.first_name, e.last_name, r.title as role, d.name AS department, r.salary, concat(e2.first_name, SPACE(1), e2.last_name) AS manager FROM employee e LEFT JOIN employee e2 ON (e.manager_id = e2.id OR e.manager_id = null) LEFT JOIN role r ON (e.role_id = r.id or e.role_id = null) LEFT JOIN department d ON (r.department_id = d.id OR r.department_id = null)", (err, res) => {
         if (err) throw err;
@@ -265,20 +266,20 @@ const viewAllEmp = () => {
         }
     });
 };
-
+// function to view all employees by department
 const viewAllEmpDep = () => {
     if (deptChoices.length === 0) {
         console.log("\r\nThere are no departments added yet!\r\n");
         init();
     } else {
         inquirer.prompt(viewEmpDeptQuestions).then(res => {
-            let keepEmpDeptChoice = res.empDeptChoice;
+            let keepEmpDeptChoice = res.empDeptChoice; // keeps user response for addition to the console.table response to show department
             connection.query(
                 "SELECT first_name, last_name FROM employee INNER JOIN role ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.empDeptChoice], (err, res) => {
                     if (err) throw err;
                     if (res.length === 0) {
                         console.log("\r\n\r\nThere are no employees added yet!\r\n");
-                        conLogRN(5);
+                        conLogRN(5); // conLogRN(x) adds extra spacing to the output to make it look nice
                     } else {
                         res.unshift({
                             "department": keepEmpDeptChoice,
@@ -297,13 +298,15 @@ const viewAllEmpDep = () => {
         });
     }
 };
-
+// function to view all employees by manager
 const viewAllEmpManager = () => {
+    // employeeChoices array will have "None" as a choice so this length check is for 1
     if (employeeChoices.length === 1) {
         console.log("\r\nThere are no employees added yet!\r\n");
         init();
     } else {
         inquirer.prompt(viewEmpManagerQuestions).then(res => {
+            // get first name and last name using split(). used later in the response to indicate who the manager is with -->
             let firstName = res.empManagerChoice.split(" ")[0];
             let lastName = res.empManagerChoice.split(" ")[1];
             connection.query(
@@ -333,7 +336,7 @@ const viewAllEmpManager = () => {
         });
     }
 };
-
+// function to add extra spaces to the output to make it look nice and will not be overridden by the next init() questions
 const conLogRN = length => {
     if (length <= 4) {
         for (let i = 0; i < length; i++) {
@@ -345,8 +348,9 @@ const conLogRN = length => {
         }
     }
 }
-
+// function to add to the empty arrays depending on query from mysql database
 const checkLength = table => {
+    // create query depending on table parameter
     let query = "";
     switch (table) {
         case "department":
@@ -364,6 +368,7 @@ const checkLength = table => {
     connection.query(query,
         (err, res) => {
             if (err) throw err;
+            // if the response is 0 and it's the employee table, add "None" as an answer
             if (res.length === 0) {
                 if (table === "employee") {
                     employeeChoices.length = 0;
@@ -372,6 +377,7 @@ const checkLength = table => {
                 return;
             } else {
                 switch (table) {
+                    // empty the arrays and recreate them with response from mysql database
                     case "department":
                         deptChoices.length = 0;
                         deptIds.length = 0;
@@ -416,7 +422,7 @@ const checkLength = table => {
             }
         });
 }
-
+// function to add a department
 const addDept = () => {
     inquirer.prompt(addDeptQuestions).then(res => {
         connection.query(
@@ -432,7 +438,7 @@ const addDept = () => {
         console.log(e)
     });
 }
-
+// function to add a role
 const addRole = () => {
     if (deptChoices.length === 0) {
         console.log("Please add a department before adding any roles!\r\n");
@@ -457,9 +463,10 @@ const addRole = () => {
         });
     }
 };
-
+// function to add an employee
 const addEmp = () => {
     checkLength("employee");
+    // can't add an employee until there is a department and a role so these if/else statements check for that
     if (deptChoices.length === 0) {
         console.log("\r\nPlease add a department before adding any employees!\r\n");
         init();
@@ -486,7 +493,7 @@ const addEmp = () => {
         });
     }
 };
-
+// function to update an employee's role
 const updateEmpRole = () => {
     checkLength("employee");
     if (employeeChoices.length === 1) {
@@ -522,7 +529,7 @@ const updateEmpRole = () => {
         });
     }
 }
-
+// function to update an employee's manager
 const updateEmpManager = () => {
     checkLength("employee");
     if (employeeChoices.length === 1) {
@@ -547,7 +554,6 @@ const updateEmpManager = () => {
                     }
                 );
             }
-            // employeeChoices.pop();
         }).then(() => {
             checkLength("employee");
             init();
@@ -556,7 +562,7 @@ const updateEmpManager = () => {
         });
     }
 };
-
+// function that uses the arrays deptIds, roleIds, managerIds (as arrayName parameter) to find the id of the passed in arrayParam. the Ids arrays contain objects and are created in the checkLength function
 const findId = (arrayName, arrayParam) => {
     if (arrayParam === "None") {
         return null;
@@ -572,7 +578,7 @@ const findId = (arrayName, arrayParam) => {
         return returnThisId;
     }
 }
-
+// function to delete a department
 const deleteDept = () => {
     checkLength("department");
     if (deptChoices.length === 0) {
@@ -600,7 +606,7 @@ const deleteDept = () => {
         });
     }
 };
-
+// function to delete a role
 const deleteRole = () => {
     checkLength("role");
     if (roleChoices.length === 0) {
@@ -628,7 +634,7 @@ const deleteRole = () => {
         });
     }
 };
-
+// function to delete an employee
 const deleteEmployee = () => {
     checkLength("employee");
     if (employeeChoices.length === 1) {
@@ -660,7 +666,7 @@ const deleteEmployee = () => {
         });
     }
 };
-
+// function to view the total budget by department
 const viewBudgetDep = () => {
     if (employeeChoices.length === 1) {
         console.log("\r\nThere are no employees added yet!\r\n");
@@ -671,6 +677,8 @@ const viewBudgetDep = () => {
             connection.query(
                 "SELECT sum(salary) as total_budget FROM role INNER JOIN employee ON role_id = role.id INNER JOIN department ON department_id = department.id WHERE department.name = ?", [res.budgetDepChoice], (err, res) => {
                     if (err) throw err;
+                    // the totalBudget variable grabs the actual number from the response from mysql.
+                    // the newResponse variable uses the department chosen by the user and the totalBudget number to create the response to show to the user
                     let totalBudget = res[0].total_budget;
                     let newResponse = [{
                         "department": keepEmpDeptChoice,
